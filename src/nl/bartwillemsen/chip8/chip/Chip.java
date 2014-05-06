@@ -92,23 +92,33 @@ public class Chip
 		memory[0x200] = 5;
 		memory[0x201] = 3;
 
-		// Get the opcode.
-		char opcode = fetchOpcode();
+		// Get the opcode. All instructions are 2 bytes long.
+		//
+		// To make room for the next byte we shift the first byte eight
+		// positions to the left. We then do an OR operation to place
+		// the next byte in the created area.
+		char opcode = (char) (memory[PC] << 8 | memory[PC + 1]);
 
 		System.out.println(Integer.toBinaryString(opcode));
 	}
 
 	/**
-	 * Fetch an operation from the memory. All operations are 2 bytes long.
+	 * Decode an opcode to determine what operation to execute.
 	 *
-	 * @return the combined values which together makes an operation code.
+	 * @param opcode The opcode that needs to be decoded.
 	 */
-	private char fetchOpcode()
+	public void decodeOpcode(char opcode)
 	{
-		// All instructions are 2 bytes long. We need to combine 2 memory
-		// spaces into one by shifting the first location 8 positions to
-		// the left to make room for the next byte, we then do an OR
-		// operation to place the next memory location in that area.
-		return (char) (memory[PC] << 8 | memory[PC + 1]);
+		// Here we basically filter on the first nibble, since that digit
+		// determines what we need to do.
+		switch (opcode & 0xF000) {
+
+			case 0x1000: // 1nnn - "jump to location nnn"
+				break;
+
+			default:
+				System.err.println("Unsupported opcode.");
+				System.exit(1);
+		}
 	}
 }

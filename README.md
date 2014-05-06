@@ -4,7 +4,7 @@ This is my attempt to create a Chip-8 emulator in Java. Mostly to learn more abo
 
 ## About Chip-8
 
-Chip-8 is an interpreted programming language used mostly for games from the late 1970s. So were actually writing an interpreter instead of emulating real hardware. Still, this interpreter acts like a virtual machine with its own memory, registers and pointers so it will be pretty damn close to the real thing!
+Chip-8 is an interpreted programming language used mostly for games from the late 1970s. So we're actually writing an interpreter instead of emulating real hardware. Still, this interpreter acts like a virtual machine with its own memory, registers and pointers so it will be pretty damn close to the real thing!
 
 Since its really small and has a fairly simple set of instructions I figured this would be the most easy project to start with something as complex as emulating hardware and I am sure it will still be quiet a challenge.
 
