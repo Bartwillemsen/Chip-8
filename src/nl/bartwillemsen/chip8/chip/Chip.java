@@ -81,6 +81,10 @@ public class Chip
 		keys = new byte[16];
 
 		display = new byte[64 * 32];
+
+		display[0] = 1;
+		display[5] = 1;
+		display[96] = 1;
 	}
 
 	/**
@@ -88,10 +92,6 @@ public class Chip
 	 */
 	public void run()
 	{
-		// Some test values..
-		memory[0x200] = 5;
-		memory[0x201] = 3;
-
 		// Get the opcode. All instructions are 2 bytes long.
 		//
 		// To make room for the next byte we shift the first byte eight
@@ -99,7 +99,9 @@ public class Chip
 		// the next byte in the created area.
 		char opcode = (char) (memory[PC] << 8 | memory[PC + 1]);
 
-		System.out.println(Integer.toBinaryString(opcode));
+		System.out.print(Integer.toHexString(opcode) + ": ");
+
+		decodeOpcode(opcode);
 	}
 
 	/**
@@ -120,5 +122,10 @@ public class Chip
 				System.err.println("Unsupported opcode.");
 				System.exit(1);
 		}
+	}
+
+	public byte[] getDisplay()
+	{
+		return display;
 	}
 }

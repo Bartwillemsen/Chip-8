@@ -8,6 +8,8 @@ public class Main
 	{
 		Chip c = new Chip();
 
-		c.run();
+		ChipFrame frame = new ChipFrame(c);
+		frame.setVisible(true);
+//		c.run();
 	}
 }
