@@ -57,6 +57,11 @@ public class Chip
 	 */
 	private byte[] display;
 
+	public Chip()
+	{
+		init();
+	}
+
 	/**
 	 * Reset all variables to their default values.
 	 */
@@ -76,5 +81,34 @@ public class Chip
 		keys = new byte[16];
 
 		display = new byte[64 * 32];
+	}
+
+	/**
+	 * Run the operation.
+	 */
+	public void run()
+	{
+		// Some test values..
+		memory[0x200] = 5;
+		memory[0x201] = 3;
+
+		// Get the opcode.
+		char opcode = fetchOpcode();
+
+		System.out.println(Integer.toBinaryString(opcode));
+	}
+
+	/**
+	 * Fetch an operation from the memory. All operations are 2 bytes long.
+	 *
+	 * @return the combined values which together makes an operation code.
+	 */
+	private char fetchOpcode()
+	{
+		// All instructions are 2 bytes long. We need to combine 2 memory
+		// spaces into one by shifting the first location 8 positions to
+		// the left to make room for the next byte, we then do an OR
+		// operation to place the next memory location in that area.
+		return (char) (memory[PC] << 8 | memory[PC + 1]);
 	}
 }
