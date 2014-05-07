@@ -1,5 +1,7 @@
 package nl.bartwillemsen.chip8.chip;
 
+import java.io.*;
+
 public class Chip
 {
 	/**
@@ -57,6 +59,11 @@ public class Chip
 	 */
 	private byte[] display;
 
+	/**
+	 * Indicates if the screen needs to be redrawn.
+	 */
+	private boolean needRedraw;
+
 	public Chip()
 	{
 		init();
@@ -82,9 +89,7 @@ public class Chip
 
 		display = new byte[64 * 32];
 
-		display[0] = 1;
-		display[5] = 1;
-		display[96] = 1;
+		needRedraw = false;
 	}
 
 	/**
@@ -118,14 +123,97 @@ public class Chip
 			case 0x1000: // 1nnn - "jump to location nnn"
 				break;
 
+			case 0x2000: // 2nnn - "call subroutine at nnn"
+				// Get address location nnn.
+				char address = (char) (opcode & 0x0FFF);
+
+				// The interpreter increments the stack pointer, then puts the
+				// current PC on the top of the stack. The PC is then set to nnn.
+				stack[SP] = PC;
+				SP++;
+				PC = address;
+
+				break;
+
+			case 0x3000: // 3xkk - "Skip next instruction if Vx = kk"
+				break;
+
+			case 0x7000: // 7xkk - "Set Vx = Vx + kk"
+				break;
+
+			case 0x8000: // Contains more data in last nibble.
+
+				switch (opcode & 0x000F) {
+
+					case 0x0000:
+					default:
+						System.err.println("Unsupported opcode.");
+						System.exit(0);
+				}
+				break;
+
 			default:
 				System.err.println("Unsupported opcode.");
-				System.exit(1);
+				System.exit(0);
 		}
 	}
 
+	/**
+	 * Get the current state of the full display
+	 *
+	 * @return The array of the state of all the screen pixels
+	 */
 	public byte[] getDisplay()
 	{
 		return display;
+	}
+
+	/**
+	 * Does the screen needs to be redrawn?
+	 *
+	 * @return TRUE if we need to redraw or FALSE otherwise
+	 */
+	public boolean needsRedraw()
+	{
+		return needRedraw;
+	}
+
+	/**
+	 * Set the redraw flag back to false.
+	 */
+	public void removeDrawFlag()
+	{
+		needRedraw = false;
+	}
+
+	/**
+	 * Load a Chip-8 program into the memory.
+	 *
+	 * @param file The file that needs to be loaded
+	 */
+	public void loadProgram(String file)
+	{
+		DataInputStream input = null;
+
+		try {
+			input = new DataInputStream(new FileInputStream(new File(file)));
+
+			int offset = 0;
+			while (input.available() > 0) {
+				memory[0x200 + offset] = (char) (input.readByte() & 0xff);
+				offset++;
+			}
+
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.exit(1);
+		} finally {
+
+			if (input != null) {
+				try {
+					input.close();
+				} catch (IOException e) {}
+			}
+		}
 	}
 }

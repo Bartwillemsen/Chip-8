@@ -1,4 +1,4 @@
-package nl.bartwillemsen.chip8.emu;
+package nl.bartwillemsen.chip8.ui;
 
 import nl.bartwillemsen.chip8.chip.Chip;
 
