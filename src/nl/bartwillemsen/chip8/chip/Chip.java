@@ -123,19 +123,25 @@ public class Chip
 			case 0x1000: // 1nnn - "jump to location nnn"
 				break;
 
-			case 0x2000: // 2nnn - "call subroutine at nnn"
-				// Get address location nnn.
-				char address = (char) (opcode & 0x0FFF);
-
-				// The interpreter increments the stack pointer, then puts the
-				// current PC on the top of the stack. The PC is then set to nnn.
+			case 0x2000:
+				// 2nnn - The interpreter increments the stack pointer, then puts
+				// the current PC on the top of the stack. The PC is then set to nnn.
 				stack[SP] = PC;
 				SP++;
-				PC = address;
+				PC = (char) (opcode & 0x0FFF);
 
 				break;
 
 			case 0x3000: // 3xkk - "Skip next instruction if Vx = kk"
+				break;
+
+			case 0x6000: // 6xkk - "Set Vx = kk"
+				// We just need the value of position x! So we shift 8 bytes to the right.
+				int x = (opcode & 0x0F00) >> 8;
+
+				// The interpreter puts the value kk into register Vx.
+				V[x] = (char) (opcode & 0x00FF);
+				PC += 2;
 				break;
 
 			case 0x7000: // 7xkk - "Set Vx = Vx + kk"
@@ -150,6 +156,12 @@ public class Chip
 						System.err.println("Unsupported opcode.");
 						System.exit(0);
 				}
+				break;
+
+			case 0xA000:
+				// Annn - The value of register I is set to nnn.
+				I = (char) (opcode & 0x0FFF);
+				PC += 2;
 				break;
 
 			default:
