@@ -90,6 +90,8 @@ public class Chip
 		display = new byte[64 * 32];
 
 		needRedraw = false;
+
+		loadFontset();
 	}
 
 	/**
@@ -145,6 +147,9 @@ public class Chip
 				break;
 
 			case 0x7000: // 7xkk - "Set Vx = Vx + kk"
+				int _x = (opcode & 0x0F00) >> 8;
+				int kk = (opcode & 0x0FF);
+				V[_x] = (char) ((V[_x] + kk) & 0xFF);
 				break;
 
 			case 0x8000: // Contains more data in last nibble.
@@ -161,6 +166,11 @@ public class Chip
 			case 0xA000:
 				// Annn - The value of register I is set to nnn.
 				I = (char) (opcode & 0x0FFF);
+				PC += 2;
+				break;
+
+			case 0xD000:
+				// Dxyn - Draw a sprite at position x, y.
 				PC += 2;
 				break;
 
@@ -212,7 +222,7 @@ public class Chip
 
 			int offset = 0;
 			while (input.available() > 0) {
-				memory[0x200 + offset] = (char) (input.readByte() & 0xff);
+				memory[0x200 + offset] = (char) (input.readByte() & 0xFF);
 				offset++;
 			}
 
@@ -226,6 +236,16 @@ public class Chip
 					input.close();
 				} catch (IOException e) {}
 			}
+		}
+	}
+
+	/**
+	 * Load the fontset into memory.
+	 */
+	public void loadFontset()
+	{
+		for (int i = 0; i < ChipData.fontset.length; i++) {
+			memory[0x50 + i] = (char) (ChipData.fontset[i] & 0xFF);
 		}
 	}
 }
