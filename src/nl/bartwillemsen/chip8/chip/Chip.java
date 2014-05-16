@@ -122,8 +122,8 @@ public class Chip
 		switch (opcode & 0xF000) {
 
 			case 0x1000: // 1nnn - "jump to location nnn"
-				System.err.println("Unsupported opcode!");
-				System.exit(1);
+				int nnn = opcode & 0x0FFF;
+				PC = (char) nnn;
 				break;
 
 			case 0x2000:
@@ -135,10 +135,20 @@ public class Chip
 				System.out.println("Calling " + Integer.toHexString(PC).toUpperCase());
 				break;
 
-			case 0x3000: // 3xkk - "Skip next instruction if Vx = kk"
-				System.err.println("Unsupported opcode!");
-				System.exit(1);
+			case 0x3000: {// 3xkk - "Skip next instruction if Vx = kk"
+				int x = (opcode & 0x0F00) >> 8;
+				int kk = (opcode & 0x00FF);
+
+				System.out.print("Is V[" + x + "] = " + kk + "? ");
+				if (V[x] == kk) {
+					System.out.println("Yes. Skip next instruction.");
+					PC += 4;
+				} else {
+					System.out.println("No. Continue normally");
+					PC += 2;
+				}
 				break;
+			}
 
 			case 0x6000: {// 6xkk - "Set Vx = kk"
 				// We just need the value of position x! So we shift 8 bytes to the right.
@@ -178,10 +188,39 @@ public class Chip
 				System.out.println("Set I to " + Integer.toHexString(I).toUpperCase());
 				break;
 
-			case 0xD000:
+			case 0xD000: {
 				// Dxyn - Draw a sprite at position x, y.
+				int x = V[(opcode & 0x0F00) >> 8];
+				int y = V[(opcode & 0x00F0) >> 4];
+				int height = opcode & 0x000F;
+
+				V[0xF] = 0;
+
+				for (int _y = 0; _y < height; _y++) {
+					int line = memory[I + _y];
+
+					for (int _x = 0; _x < 8; _x++) {
+						int pixel = line & (0x80 >> _x);
+
+						if (pixel != 0) {
+							int totalX = x + _x;
+							int totalY = y + _y;
+							int index = totalY * 64 + totalX;
+
+							if (display[index] == 1) {
+								V[0xF] = 1;
+							}
+
+							display[index] ^= 1;
+						}
+					}
+				}
+
 				PC += 2;
+				needRedraw = true;
+				System.out.println("Drawing at V[" + ((opcode & 0x0F00) >> 8) + "] = " + x + ", V[" + ((opcode & 0x00F0) >> 4) + "] = " + y);
 				break;
+			}
 
 			default:
 				System.err.println("Unsupported opcode.");
