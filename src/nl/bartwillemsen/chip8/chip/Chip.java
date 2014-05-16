@@ -121,6 +121,27 @@ public class Chip
 		// determines what we need to do.
 		switch (opcode & 0xF000) {
 
+			case 0x0000:
+				switch (opcode & 0x00FF) {
+					case 0x00E0: // 00E0 - CLS
+						System.err.println("Unsupported opcode.");
+						System.exit(1);
+						break;
+
+					case 0x00EE: // 00EE - "Return from a subroutine"
+						SP--;
+						PC = (char) (stack[SP] + 2);
+						System.out.println("Returning to " + Integer.toHexString(PC).toUpperCase());
+						break;
+
+					default:
+						System.err.println("Unsupported opcode.");
+						System.exit(1);
+						break;
+
+				}
+				break;
+
 			case 0x1000: // 1nnn - "jump to location nnn"
 				int nnn = opcode & 0x0FFF;
 				PC = (char) nnn;
